@@ -331,10 +331,10 @@
 		
 		Da questa tabella si può osservare, come già evidenziato nella sezione \ref{strategie}, che:
 		\begin{itemize}
-			\item la warp divergence sia nulla per tutti e tre i kernel [vedi comando branch\_efficiency];
-			\item per i primi due kernel l'accesso alla global memory è efficiente (quindi allineata e coalesced), 
-				mentre nel terzo kernel è meno efficiente (infatti non è allineata) [vedi comandi gld\_efficiency e gst\_efficiency];
-			\item l'uso degli SM sia molto efficiente in tutti e tre i kernel [vedi comando sm\_efficiency];
+			\item la warp divergence è nulla per tutti e tre i kernel [vedi comando branch\_efficiency];
+			\item per i primi due kernel l'accesso alla global memory è efficiente (quindi allineato e coalesced), 
+				mentre nel terzo kernel è meno efficiente (infatti non è allineato) [vedi comandi gld\_efficiency e gst\_efficiency];
+			\item l'uso degli SM è molto efficiente in tutti e tre i kernel [vedi comando sm\_efficiency];
 			\item l'uso della shared memory provoca molti bank conflict, causando un cattivo uso della stessa [vedi comando shared\_efficiency].
 		\end{itemize}
 		
