@@ -317,13 +317,14 @@
 		\begin{table}[h]			
 			\centering
 			\begin{tabular}{c|ccc}
-								   & bitonic\_sort & bitonic\_merge & bitonic\_merge\_2 \\
+								    & bitonic\_sort & bitonic\_merge & bitonic\_merge\_2 \\
 		        \hline
-				branch\_efficiency & 100.00\%      & 100.00\%       & 100.00\%          \\
-				gld\_efficiency    & 100.00\%      & 100.00\%       &  77.27\%          \\
-				gst\_efficiency    & 100.00\%      & 100.00\%       &  82.07\%          \\
-				sm\_efficiency     &  95.42\%      &  95.62\%       &  99.28\%          \\
-				shared\_efficiency &  28.09\%      &  46.38\%       &  26.35\%          \\
+				branch\_efficiency  & 100.00\%      & 100.00\%       & 100.00\%          \\
+				gld\_efficiency     & 100.00\%      & 100.00\%       &  77.27\%          \\
+				gst\_efficiency     & 100.00\%      & 100.00\%       &  82.07\%          \\
+				sm\_efficiency      &  95.42\%      &  95.62\%       &  99.28\%          \\
+				shared\_efficiency  &  28.09\%      &  46.38\%       &  26.35\%          \\
+				achieved\_occupancy &  47.54\%      &  31.97\%       &  46.90\%          \\
 			\end{tabular}
 			\caption{Tabella con le metriche di profilazione}
 			\label{tab:prof}
@@ -335,7 +336,8 @@
 			\item per i primi due kernel l'accesso alla global memory è efficiente (quindi allineato e coalesced), 
 				mentre nel terzo kernel è meno efficiente (infatti non è allineato) [vedi comandi gld\_efficiency e gst\_efficiency];
 			\item l'uso degli SM è molto efficiente in tutti e tre i kernel [vedi comando sm\_efficiency];
-			\item l'uso della shared memory provoca molti bank conflict, causando un cattivo uso della stessa [vedi comando shared\_efficiency].
+			\item l'uso della shared memory provoca molti bank conflict, causando un cattivo uso della stessa [vedi comando shared\_efficiency];
+			\item la quantità di warp attivi rispetto al numero massimo di warp per MS è medio/basso [vedi comando achieved\_occupancy].
 		\end{itemize}
 		
 		Infine con lo strumento nvvp si è profilata l'esecuzione dei kernel nel tempo (timeline). Il risultato è nella figura \ref{fig:nvvp}.
