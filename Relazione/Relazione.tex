@@ -44,6 +44,7 @@
 		Infatti questa sincronizzazione è legata alla struttura hardware della scheda e quindi è molto meno costosa di una sincronizzazione 
 		esplicita.
 	
+		La complessità in tempo del warpsort è $O(n \log(n))$ nel caso peggiore.
 	\section{Algoritmo}
 		L'algoritmo si divide in 4 fasi principali più una fase preliminare. 
 		Di queste cinque fasi, la terza è interamente svolta dalla CPU, che ha mostrato migliori performance della GPU.
@@ -211,6 +212,7 @@
 			
 			Quando $i$ supera il valore $l-1$ allora vuol dire che sono state unite tutte le righe e quindi che si è
 			generato l'array ordinato finale.
+			
 	\section{Strategie}
 		\label{strategie}
 		Il codice prodotto cerca di sfruttare al massimo le potenzialità della GPU.
