@@ -230,7 +230,7 @@
 			(confronto che poi può portare allo swap dei due).
 		
 		\subsection{Memorie}
-			In tutti e tre i kernel si sono fatti accessi coalesced alla \emph{global memory}.
+			In tutti e tre i kernel si sono fatti accessi coalescenti alla \emph{global memory}.
 			Nei kernel 1 e 2 gli accessi sono stati anche allineati, per garantire il massimo delle performance. Nel kernel 4 
 			invece l'allineamento non è stato possibile per via del problema, già evidenziato nella sottosezione \ref{fase4}, 
 			legato alle dimensioni diverse dei sotto-array e alla necessità di aggiungere padding.
@@ -238,13 +238,13 @@
 			Tutti e tre i kernel fanno uso della \emph{shared memory} in cui viene copiato integralmente o parzialmente 
 			il/i sotto-array su cui il warp sta lavorando. Questo perché la rete generata dal bitonic\_sort fa accessi multipli 
 			alle stesse locazioni, e quindi copiare questi dati dalla global alla shared memory ha aiutato le performance.
-			Le copie dalla global memory alla shared memory (e viceversa) sono state progettate per garantire l'accesso coalesced e, tranne nel
+			Le copie dalla global memory alla shared memory (e viceversa) sono state progettate per garantire l'accesso coalescente e, tranne nel
 			terzo kernel, allineato alla global memory. 
 			
 			Purtroppo i tre kernel non riescono ad evitare di causare dei \emph{bank conflict} durante l'accesso alla shared memory. 
 			Questo è intrinsecamente legato al modo in cui avvengono gli accessi in memoria nella rete generata dal bitonic\_sort.
 			Nonostante questo problema, l'uso della shared memory è comunque notevolmente più performante dell'uso della sola global memory 
-			(che per di più senza la shared memory perderebbe l'accesso allineato e coalesced).  
+			(che per di più senza la shared memory perderebbe l'accesso allineato e coalescente).  
 		
 			Infine si è optato per l'uso della memoria globale "classica" (ad uso esclusivo della GPU) in quanto ha dimostrato performace
 			nettamente migliori della \emph{unified memory}.
@@ -335,7 +335,7 @@
 		Da questa tabella si può osservare, come già evidenziato nella sezione \ref{strategie}, che:
 		\begin{itemize}
 			\item la warp divergence è nulla per tutti e tre i kernel [vedi comando branch\_efficiency];
-			\item per i primi due kernel l'accesso alla global memory è efficiente (quindi allineato e coalesced), 
+			\item per i primi due kernel l'accesso alla global memory è efficiente (quindi allineato e coalescente), 
 				mentre nel terzo kernel è meno efficiente (infatti non è allineato) [vedi comandi gld\_efficiency e gst\_efficiency];
 			\item l'uso degli SM è molto efficiente in tutti e tre i kernel [vedi comando sm\_efficiency];
 			\item l'uso della shared memory provoca molti bank conflict, causando un cattivo uso della stessa [vedi comando shared\_efficiency];
