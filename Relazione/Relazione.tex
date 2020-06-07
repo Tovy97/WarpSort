@@ -330,7 +330,7 @@
 			\end{tabular}
 			\caption{Tabella con le metriche di profilazione}
 			\label{tab:prof}
-			\end{table}
+		\end{table}
 		
 		Da questa tabella si può osservare, come già evidenziato nella sezione \ref{strategie}, che:
 		\begin{itemize}
@@ -341,6 +341,22 @@
 			\item l'uso della shared memory provoca molti bank conflict, causando un cattivo uso della stessa [vedi comando shared\_efficiency];
 			\item la quantità di warp attivi rispetto al numero massimo di warp per MS è medio/basso [vedi comando achieved\_occupancy].
 		\end{itemize}
+		
+		Inoltre nella tabella \ref{tab:nvprof} è riportata la durata in tempo e in percentuale e il numero di chiamate 
+		effettuate per ogni kernel (profilazione avvenuta con un array di input con dimensione $134217728=2^{27}$).
+		\begin{table}[h]			
+			\centering
+			\begin{tabular}{c|ccc}
+				                  & bitonic\_sort & bitonic\_merge & bitonic\_merge\_2 \\
+				\hline
+				Tempo totale [ms] & 188.30        &        2721.71 &            213.15 \\
+				Tempo medio  [ms] &  94.15        &         108.87 &             71.05 \\
+				Numero chiamate   &      2        &             25 &                 3 \\	
+				Durata [\%]       &   3.17        &          45.88 &              3.59 \\		
+			\end{tabular}
+			\caption{Tabella di profilazione}
+			\label{tab:nvprof}
+		\end{table}
 		
 		Infine con lo strumento nvvp si è profilata l'esecuzione dei kernel nel tempo (timeline). Il risultato è nella figura \ref{fig:nvvp}.
 		
