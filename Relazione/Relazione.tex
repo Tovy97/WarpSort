@@ -67,7 +67,8 @@
 		
 		\subsection{Preparazione dell'input}
 			\label{preInput}
-			Questo algoritmo necessità che l'array in input abbia una lunghezza $M$ multiplo di una potenza di $2$.
+			Questo algoritmo necessità che l'array in input abbia una lunghezza $M$ multiplo di una potenza di $2$ e maggiore di $S*K$ (per 
+			dettagli su $S$ e $K$ vedi sottosezione \ref{fase0}).
 			A questo scopo, dato un array di dimensione $N$ qualsiasi, viene calcolato il parametro 
 			$$MULT = 2^{3 * (\lfloor \log_{10} N\rfloor + 1)}$$ 
 			Viene quindi esteso l'array fino al raggiungimento della lunghezza $M$, dove $M$ è il più piccolo multiplo di $MULT$ maggiore
