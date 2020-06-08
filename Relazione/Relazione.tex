@@ -67,8 +67,8 @@
 		
 		\subsection{Preparazione dell'input}
 			\label{preInput}
-			Questo algoritmo necessità che l'input sia di lunghezza  $N$, con $N$ multiplo di una potenza di $2$.
-			A questo scopo viene calcolato il parametro 
+			Questo algoritmo necessità che l'array in input abbia una lunghezza $M$ multiplo di una potenza di $2$.
+			A questo scopo, dato un array di dimensione $N$ qualsiasi, viene calcolato il parametro 
 			$$MULT = 2^{3 * (\lfloor \log_{10} N\rfloor + 1)}$$ 
 			Viene quindi esteso l'array fino al raggiungimento della lunghezza $M$, dove $M$ è il più piccolo multiplo di $MULT$ maggiore
 			o uguale a $N$.
@@ -133,13 +133,13 @@
 			composta da $k+1$ passi.
 			In ogni fase vengono selezionate coppie di due elementi ed eseguite operazioni di confronto e scambio (con riferimento alla figura
 			\ref{fig:bitonicsort} la freccia, dopo il confronto e il possibile scambio, deve puntare all'elemento maggiore). 
-			Tra due passi adiacenti (e quindi anche tra due fasi adiacenti) è necessaria una sincronizzazione globale dei thread che lavorano 
+			Tra due passi adiacenti (e quindi anche tra due fasi adiacenti) è necessaria una sincronizzazione dei thread che lavorano 
 			allo stesso	sotto-array. 
 			Per evitare questo sovraccarico di sincronizzazione l'algoritmo ordina ogni sotto-array attraverso un warp, piuttosto 
 			che per blocco. In questo modo si sfrutta il vantaggio dell'esecuzione sincrona di thread in un warp, 
 			per eliminare la necessità di barriere esplicite.
 			
-			Come si può vedere nella figura \ref{fig:bitonicsort} tutte le fasi tranne l'ultima si basano sulla stessa rete di comparatori, 
+			Come si può vedere nella figura \ref{fig:bitonicsort} tutte le fasi tranne l'ultima si basano su una rete di comparatori opposti a due a due, 
 			mentre l'ultima fase, che varia rispetto alle precedenti, è detta \emph{bitonic\_merge}.
 			\begin{figure}
 				\centering
@@ -250,7 +250,7 @@
 			Infine si è optato per l'uso della memoria globale "classica" (ad uso esclusivo della GPU) in quanto ha dimostrato performace
 			nettamente migliori della \emph{unified memory}.
 			
-			La \emph{pinned memory} è stata usata temporaneamente per permettere alla CPU di riempire l'array da ordinare. 
+			La \emph{pinned memory} è stata usata temporaneamente per salvare l'array da ordinare. 
 			In questo modo è stato possibile per lo stream della GPU copiarla in modo asincrono nella memoria device.
 		\subsection{Unrolling}
 			Nei kernel 1 e 3 si è usato l'unrolling per eliminare la presenza di tutti i cicli in cui il numero di iterazioni è conosciuto a
@@ -262,24 +262,28 @@
 			uno per la fase 0 e uno per le altre 4 fasi.			
 			In particolare questo ha permesso l'esecuzione parallela della fase 0 con le fasi 1 e 2.
 			
-			Tutte le copie di memoria sono state rese asincronie tra CPU e stream. In questo modo la CPU ha modo di continuare la 
-			computazione senza dover attendere che la copia in memoria sia terminata.			
+			Tutte le copie di memoria sono state rese asincronie tra CPU e stream. In questo modo la CPU ha potuto continuare la 
+			computazione senza dover attendere che la copia in memoria fosse terminata.			
 			
 		\subsection{Event}
 			Per calcolare il tempo impiegato dall'intero algoritmo di ordinamento si è sfruttato lo stream di default (o stream 0)
 			in cui sono stati inseriti due eventi: uno prima di iniziare l'ordinamento e il secondo alla fine dell'ordinamento.
 			La differenza tra i timestamp di questi due eventi ha permesso una misurazione accurata del tempo impiegato del warpsort per ordinare.
+			La scelta dello stream di default non è stata causale: esso
+			completa un evento quando tutti i kernel in esecuzione su 
+			tutti gli stream sono completati.
 	\section{API}
 		Per generare rapidamente i numeri random con cui popolare l'array da ordinare si è usata la libreria cuRAND. In questo modo è stata
 		velocizzata notevolmente la generazione dei valori. 
+		In particolare è stata usata la versione host della libreria.
 	\section{Applicazione}
-		L'applicazione richiede in input da linea di comando. Qui la specifica: 
+		L'applicazione richiede un input da linea di comando. Qui la specifica: 
 		\begin{verbatim}
 			{-f "path"| -t N | -i N | -r N} [-g] [-p S] [-c] [-o "path" | -s]
 		\end{verbatim}
 		dove:
 		\begin{itemize}
-			\item \emph{-f path} indica che l'array da ordinare è dal file \emph{path};
+			\item \emph{-f path} indica che l'array da ordinare è nel file \emph{path} (un elemento per riga);
 			\item \emph{-t $N$} indica che l'array da ordinare deve essere di dimensione $N$ (con $N > 0$) e deve essere generato randomicamente;
 			\item \emph{-i $N$} indica che l'array da ordinare deve essere di dimensione $N$ (con $N > 0$) e deve essere letto da standard input;
 			\item \emph{-r $N$} indica che l'array da ordinare deve essere di dimensione $N$ (con $N > 0$) e deve essere generato randomicamente
@@ -308,14 +312,13 @@
 			\item $S$ è il tempo, espresso in secondi, impiegati per effettuare l'ordinamento (ovvero portare a termine le 5 fasi).
 		\end{itemize}	
 	\section{Profilazione}
-		Per la profilazione si è usato il programma nvprof con il seguente comando:
-		
+		Per la profilazione si è usato il programma nvprof con il seguente comando:		
 		\begin{verbatim}
 			nvprof --metrics branch_efficiency,gld_efficiency,
-			                 gst_efficiency,sm_efficiency,shared_efficiency 
+			                 gst_efficiency,sm_efficiency,shared_efficiency, 
+			                 achieved_occupancy 
 			       WarpSort_Mantovani.exe -t 134217728
-		\end{verbatim}
-		
+		\end{verbatim}		
 		Nella tabella \ref{tab:prof} sono riportate le metriche medie per i tre kernel.
 		\begin{table}[h]			
 			\centering
@@ -332,7 +335,6 @@
 			\caption{Tabella con le metriche di profilazione}
 			\label{tab:prof}
 		\end{table}
-		
 		Da questa tabella si può osservare, come già evidenziato nella sezione \ref{strategie}, che:
 		\begin{itemize}
 			\item la warp divergence è nulla per tutti e tre i kernel [vedi comando branch\_efficiency];
@@ -343,8 +345,12 @@
 			\item la quantità di warp attivi rispetto al numero massimo di warp per MS è medio/basso [vedi comando achieved\_occupancy].
 		\end{itemize}
 		
-		Inoltre nella tabella \ref{tab:nvprof} è riportata la durata in tempo e in percentuale e il numero di chiamate 
-		effettuate per ogni kernel (profilazione avvenuta con un array di input con dimensione $134217728=2^{27}$).
+		Inoltre, in una seconda profilazione effettuata, è stato e seguito il comando:
+		\begin{verbatim}
+			nvprof  WarpSort_Mantovani.exe -t 134217728
+		\end{verbatim}
+		Nella tabella \ref{tab:nvprof} è riportato il risultato, mostrando la durata (in tempo e in percentuale) e il numero di chiamate 
+		effettuate per ogni kernel.					
 		\begin{table}[h]			
 			\centering
 			\begin{tabular}{c|ccc}
@@ -355,9 +361,12 @@
 				Numero chiamate   &      2        &             25 &                 3 \\	
 				Durata [\%]       &   3.17        &          45.88 &              3.59 \\		
 			\end{tabular}
-			\caption{Tabella di profilazione}
+			\caption{Tabella di profilazione dei tempi e del numero di 
+			chiamate}
 			\label{tab:nvprof}
-		\end{table}
+		\end{table}			
+		Si può così notare che la fase 2 è quella più onerosa in termini di tempo (è quella con il numero di chiamate
+		e con il tempo medio per chiamata maggiore)
 		
 		Infine con lo strumento nvvp si è profilata l'esecuzione dei kernel nel tempo (timeline). Il risultato è nella figura \ref{fig:nvvp}.
 		
@@ -423,9 +432,12 @@
 		La memoria dedicata del mio PC è di soli 2GB e quindi non mi è stato possibile fare prove ulteriori 
 		con array più grandi di $2^{27}$ elementi.
 		
-		Si può notare come la GPU, stranamente, sia più performante nel ordinare array senza padding.
+		Si può notare come la GPU sia più performante nel ordinare array senza padding. 
+		Infatti, empiricamente, si è mostrato che l'algoritmo è più efficiente a ordinare array fortemente disordinati. 
+		L'aggiunta di padding con il valore $\infty$ introduce una componente ordinata che già si trova nella corretta posizione dell'array. 
+		Questo porta a degradare le performance.
 		
-		Nel confronto tra CPU e GPU si può notare come, per array di piccole dimensioni, la CPU sia notevolmente più veloce (fino all'ordine del 
+		Nel confronto tra CPU e GPU si può notare come (poco sorprendentemente), per array di piccole dimensioni, la CPU sia notevolmente più veloce (fino all'ordine del 
 		milione). Dai 10 milioni in su invece la GPU ha superato la CPU nelle performance. Purtroppo, come detto in precedenza, non è stato 
 		possibile fare 
 		test con array più grandi, ma verosimilmente il divario che si è creato dai 10 milioni è destinato ad aumentare col crescere 
@@ -437,7 +449,6 @@
 	\section{Sorgenti}
 		\label{sorgenti}
 		I sorgenti sono consultabili al seguente link: \url{https://github.com/Tovy97/WarpSort}
-		
-	\newpage
+			
 	\printbibliography		
 \end{document}
