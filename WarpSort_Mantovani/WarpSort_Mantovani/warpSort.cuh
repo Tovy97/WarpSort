@@ -22,7 +22,7 @@
 /*
 	Questa costane serve a determinare il valore di S_3
 	(che moltiplicata per K_3, indica la dimensione del campione estratto durante la fase 0).
-	Questo valore deve essere una potenza di 2.
+	Questo valore deve essere una potenza di 2 e deve essere maggiore al numero di SM della GPU.
 	La moltiplicazione di BL_4 e K_3 deve essere maggiore di 128.
 */
 #define BL_4 64
