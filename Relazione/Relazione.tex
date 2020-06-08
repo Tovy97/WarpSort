@@ -88,6 +88,7 @@
 			
 			La fase 0 è caratterizzata da due valori: $S$ e $K$.
 			È fondamentale che $K$ e $S$ siano potenze di $2$, tali che $S*K \geq 128$.
+			Inoltre $S$ dovrebbe essere maggiore del numero di SM della GPU.
 			Il valore $K$ è stato definito come costante, 
 			mentre il valore $S$ è dato dalla seguente formula			
 			$$S = C * 2^{\lceil \log_2 \lfloor \log_{10} N \rfloor + 1 \rceil}$$
