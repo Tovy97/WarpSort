@@ -465,14 +465,14 @@ float* warpSort(float* in, const int array_size, const int S_3) {
 
 		//Lancio del kernel della fase 4 (che esegue un bitonin_merge) sull'array attraverso lo stream delle fasi principali
 		bitonic_merge_2 <<< (S_3 + 1), 32, 0, streamFasiPrincipali >>> (array_in, array_out, d_local_count, n, i + 1, S_3);
-
-		//Attesa della conclusione del lavoro dello stream delle fasi principali
-		CHECK(cudaStreamSynchronize(streamFasiPrincipali));
-
+		
 		//Aggiornamento della matrice su memoria host dei contatori
 		for (int j = 0; j <= S_3; ++j) {
 			local_count[j + (1 + i) * (S_3 + 1)] += local_count[j + i * (S_3 + 1)];
 		}
+
+		//Attesa della conclusione del lavoro dello stream delle fasi principali
+		CHECK(cudaStreamSynchronize(streamFasiPrincipali));
 
 		//Copia asincrona dalla memoria host della matrice contatori a quella device attraverso lo stream delle fasi principali
 		CHECK(cudaMemcpyAsync(d_local_count, local_count, (2 + i) * (S_3 + 1) * sizeof(int), cudaMemcpyHostToDevice, streamFasiPrincipali));
